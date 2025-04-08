@@ -1,6 +1,9 @@
 ARG VARIANT=16-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 
+# Update base image
+RUN apt update && apt upgrade -y
+
 # Install JFrog cli
 RUN wget -qO - https://releases.jfrog.io/artifactory/jfrog-gpg-public/jfrog_public_gpg.key | sudo apt-key add -
 RUN echo "deb https://releases.jfrog.io/artifactory/jfrog-debs xenial contrib" | sudo tee -a /etc/apt/sources.list && sudo apt update && sudo apt install -y jfrog-cli-v2-jf
@@ -15,4 +18,4 @@ RUN curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --de
 RUN apt update && apt install 1password-cli
 
 # Install other tools
-RUN apt install -y lynx jq zsh vim bat
+RUN apt install -y lynx jq zsh vim bat sudo wget gnupg2 lsb-release
