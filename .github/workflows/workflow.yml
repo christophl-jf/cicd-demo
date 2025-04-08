@@ -1,4 +1,4 @@
-name: "Build"
+name: "chrisley-ejs-build"
 on:
   workflow_dispatch:
     inputs:
