@@ -1,4 +1,4 @@
-ARG VARIANT=16-bullseye
+ARG VARIANT=20-bookworm
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
 
 # Update base image
