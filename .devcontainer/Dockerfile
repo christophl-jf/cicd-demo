@@ -1,5 +1,5 @@
 ARG VARIANT=20-bookworm
-FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
+FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 # Update base image
 RUN apt update && apt upgrade -y
