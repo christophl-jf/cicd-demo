@@ -115,8 +115,41 @@ jobs:
       - name: Build Scan
         run: |            
           jf build-scan --vuln=true --fail=false --project=${{ vars.JF_PROJECT }}
-      - name: Release Bundle Create and promote to DEV  
-        run: |            
-          jf rbc --spec=./build.info --signing-key=jfrog-christophl-rb ${{ env.JFROG_CLI_BUILD_NAME }} 0.1-${{ env.JFROG_CLI_BUILD_NUMBER }}
-          jf rbp --signing-key=jfrog-christophl-rb ${{ env.JFROG_CLI_BUILD_NAME }} 0.1-${{ env.JFROG_CLI_BUILD_NUMBER }} DEV
+#      - name: Release Bundle Create and promote to DEV  
+#        run: |            
+#          jf rbc --spec=./build.info --signing-key=jfrog-christophl-rb ${{ env.JFROG_CLI_BUILD_NAME }} 0.1-${{ env.JFROG_CLI_BUILD_NUMBER }}
+#          jf rbp --signing-key=jfrog-christophl-rb ${{ env.JFROG_CLI_BUILD_NAME }} 0.1-${{ env.JFROG_CLI_BUILD_NUMBER }} DEV
+
+# Release Management - Create Evidence and a Release Bundle
+      - name: Evidence on docker
+        run: |
+          echo '{ "actor": "${{ github.actor }}", "date": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'" }' > sign.json
+          jf evd create --package-name example-go-app --package-version ${{ github.run_number }} --package-repo-name ${REPO_NAME} \
+          --key "${{ secrets.PRIVATE_KEY }}" --key-alias ${{ secrets.KEY_ALIAS }} \
+          --predicate ./sign.json --predicate-type https://jfrog.com/evidence/signature/v1 
+          echo '🔎 Evidence attached: `signature` 🔏 ' 
+
+      - name: Collecting Information from Git
+        run: jf rt build-add-git
+
+      - name: Collecting Environment Variables
+        run: jf rt build-collect-env
+
+      - name: Publish build info
+        run: jfrog rt build-publish
+        
+      - name: Sign build evidence
+        run: |
+          echo '{ "actor": "${{ github.actor }}", "date": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'" }' > sign.json
+          jf evd create --build-name ${{ github.workflow }} --build-number ${{ github.run_number }} \
+            --predicate ./sign.json --predicate-type https://jfrog.com/evidence/build-signature/v1 \
+            --key "${{ secrets.PRIVATE_KEY }}"  --key-alias ${{ secrets.KEY_ALIAS }}
+          echo '🔎 Evidence attached: `build-signature` 🔏 ' >> $GITHUB_STEP_SUMMARY
+
+      - name: Create release bundle
+        run: |
+          echo '{ "files": [ {"build": "'"${{ github.workflow }}/${{ github.run_number }}"'" } ] }' > bundle-spec.json
+          jf release-bundle-create ${{ github.actor }}-evidence-training ${{ github.run_number }} --signing-key ${{ secrets.RB_KEY }} --spec bundle-spec.json --sync=true
+          VER_LINK=${{ vars.ARTIFACTORY_URL }}'/ui/artifactory/lifecycle/?bundleName='${{ github.actor }}-evidence-training'&bundleToFlash='${{ github.actor }}-evidence-training'&releaseBundleVersion='${{ github.run_number }}'&repositoryKey=release-bundles-v2&activeKanbanTab=promotion'
+          echo '📦 Release bundle ['${{ github.actor }}-evidence-training:${{ github.run_number }}']('${VER_LINK}') created' >> $GITHUB_STEP_SUMMARY
    
