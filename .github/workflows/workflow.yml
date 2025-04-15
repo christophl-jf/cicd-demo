@@ -149,10 +149,7 @@ jobs:
 
       - name: Create release bundle
         run: |
-          echo '{ "files": [ {"build": "'"${{ github.workflow }}/${{ github.run_number }}"'" } ] }' > bundle-spec.json
-          cat ./build.info
           jf rbc --spec=./build.info --project ${{ vars.JF_PROJECT }} --sync=true --signing-key=${{ secrets.RB_KEY }} ${{ env.JFROG_CLI_BUILD_NAME }} 0.1-${{ env.JFROG_CLI_BUILD_NUMBER }}
-          #jf release-bundle-create ${{ github.actor }} ${{ github.run_number }} --signing-key ${{ secrets.RB_KEY }} --spec bundle-spec.json --sync=true
           VER_LINK=${{ vars.ARTIFACTORY_URL }}'/ui/artifactory/lifecycle/?bundleName='${{ github.actor }}-evidence-training'&bundleToFlash='${{ github.actor }}'&releaseBundleVersion='${{ github.run_number }}'&repositoryKey=release-bundles-v2&activeKanbanTab=promotion'
           echo '📦 Release bundle ['${{ github.actor }}:${{ github.run_number }}']('${VER_LINK}') created' >> $GITHUB_STEP_SUMMARY
    
