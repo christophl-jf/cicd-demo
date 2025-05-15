@@ -57,7 +57,7 @@ jobs:
         with:
             node-version: 18      
       - name: Setup JFrog CLI 
-        uses: jfrog/setup-jfrog-cli
+        uses: jfrog/setup-jfrog-cli@v4
         id: setup-cli
         env:
           JF_URL: https://${{ vars.JF_URL }}/
